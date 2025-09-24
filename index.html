@@ -2,72 +2,48 @@
 <html>
   <head>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <script src="https://unpkg.com/aframe-hit-test@2.1.2/dist/aframe-hit-test.min.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
-      #ar-button {
+      #ar-instructions {
         position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 10px 20px;
-        font-size: 16px;
-        cursor: pointer;
-        z-index: 99;
+        top: 20px;
+        width: 100%;
+        text-align: center;
+        color: white;
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 10px;
+        z-index: 100;
+        font-family: sans-serif;
       }
     </style>
   </head>
   <body>
+    <div id="ar-instructions">바닥을 찾아 화면을 탭하세요!</div>
+
     <a-scene
-      ar-mode="camera; source: webcam;"
-      xr-mode="ar"
-      vr-mode="off"
-      renderer="antialias: true; alpha: true;"
-      embedded>
+      vr-mode-ui="enabled: false"
+      ar-mode="webxr"
+      renderer="antialias: true; alpha: true;">
 
-      <a-marker-camera preset="hiro"></a-marker-camera>
+      <a-camera position="0 0 0" look-controls="enabled: false" ar-hit-test="test: true"></a-camera>
 
-      <a-entity position="0 0 0" scale="1 1 1">
-        <a-sphere position="0 0.5 0" radius="0.5" color="blue"></a-sphere>
-      </a-entity>
+      <a-sphere id="ball" position="0 0 0" radius="0.5" color="#EF2D5E" visible="false"></a-sphere>
+
+      <script>
+        const ball = document.getElementById('ball');
+        const camera = document.querySelector('a-camera');
+
+        window.addEventListener('click', function(e) {
+          const hitTest = camera.components['ar-hit-test'];
+          if (hitTest.latestHit) {
+            const hit = hitTest.latestHit;
+            ball.setAttribute('position', `${hit.x} ${hit.y + 0.5} ${hit.z}`);
+            ball.setAttribute('visible', 'true');
+          }
+        });
+      </script>
 
     </a-scene>
-
-    <button id="take-photo-button" style="
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      z-index: 100;
-    ">사진 찍기</button>
-
-    <script>
-      // DOMContentLoaded 이벤트는 HTML 문서가 완전히 로드되고 파싱되었을 때 발생
-      document.addEventListener('DOMContentLoaded', function() {
-        const takePhotoButton = document.getElementById('take-photo-button');
-        const scene = document.querySelector('a-scene');
-
-        takePhotoButton.addEventListener('click', function() {
-          // A-Frame 장면 캔버스 요소를 가져옴
-          const canvas = scene.renderer.domElement;
-
-          // 캔버스 내용을 이미지(PNG) 데이터 URL로 변환
-          const imgDataUrl = canvas.toDataURL('image/png');
-
-          // 다운로드 링크를 동적으로 생성
-          const link = document.createElement('a');
-          link.href = imgDataUrl;
-          link.download = 'webar_photo.png'; // 다운로드될 파일명
-          
-          // 링크를 클릭하여 이미지 다운로드
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        });
-      });
-    </script>
   </body>
 </html>
